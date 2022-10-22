@@ -1,0 +1,56 @@
+<nav class="navbar navbar-expand-lg bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand">
+            {% block head %}{{title}}{% endblock %}
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{% url 'home'%}">Головна</a>
+                </li>
+                {% if request.user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="{% url 'kitchen'%}">Підприємства</a>
+                </li>
+                 {% endif %}
+
+
+                {% if user.is_superuser == 1 %}
+                <li class="nav-item">
+
+                    <a class="nav-link active" aria-current="page" href="{% url 'request'%}">Заявки</a>
+
+                </li>
+                <li class="nav-item">
+
+                    <a class="nav-link active" aria-current="page" href="{% url 'bucket'%}">Кошик</a>
+
+                </li>
+
+                <li class="nav-item">
+
+                    <a class="nav-link active" aria-current="page" href="{% url 'connect'%}">Підключення</a>
+
+                </li>
+                {% endif %}
+
+
+            </ul>
+        </div>
+        <span>
+
+      {% if request.user.is_authenticated %}
+      {{user.first_name}}  {{user.last_name}} | <a href="{% url 'logout'%}">Вийти</a>
+      {% else %}
+      <a href="{% url 'login' %}">Login</a>
+      {% endif%}
+
+
+
+    </span>
+    </div>
+</nav>

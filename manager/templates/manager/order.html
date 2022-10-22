@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<div>
+    <h1 class="text text-center">Список заявок</h1>
+    {% include 'inc/header_.html'%}
+
+
+    <table class="table">
+        {% for item in kitchen %}
+        <h2 class="text text-center">{{item.title}} | {{item.address}} </h2>
+
+        <!-- Button trigger modal bucket-->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop-{{forloop.counter0}}">
+            Відправити в кошик!
+        </button>
+
+        <!-- Modal toBucket-->
+        <div class="modal fade" id="staticBackdrop-{{forloop.counter0}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+             aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Відправити в кошик?</h1>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="send_order/{{item.id}}" method="post">
+                            {% csrf_token %}
+
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Закрити
+                                </button>
+                                <button type="submit" class="btn btn-primary" value="Update">До кошика!</button>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <thead>
+        <tr>
+            <th scope="col">Продукт</th>
+            <th scope="col">Кількість</th>
+            <th scope="col">Ціна</th>
+            <th scope="col">Одиниця виміру</th>
+            <th scope="col">Шеф</th>
+            <th scope="col">Дата/Час</th>
+            <th scope="col">Постачальник</th>
+            <th scope="col">Правка</th>
+
+        </tr>
+        </thead>
+        {% for item in orders %}
+        {% if item.send != False and item.bucket == 0%}
+        <tbody>
+        <tr>
+            <th scope="row">{{item.title}}</th>
+            <td>{{item.how_match}}</td>
+            <td>{{item.price_list.price|floatformat }}</td>
+            <td>{{item.unit}}</td>
+            <td>{{item.chef}}</td>
+            <td>{{item.date}}</td>
+            <td>{{item.price_list.provider.title}}</td>
+            <td>
+
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#exampleModal-{{item.id}}">
+                    Змінити
+                </button>
+
+
+                <div class="modal fade" id="exampleModal-{{item.id}}" tabindex="-1"
+                     aria-labelledby="exampleModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Редагувати</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+
+                                <form action="/manager/order/{{item.kitchen_id}}/update/{{item.id}}" method="post">
+                                    {% csrf_token %}
+
+
+                                    <input name='how_match' value="{{item.how_match}}" type="text"
+                                           class="form-control"
+                                           required>
+
+
+                                    <select name='provider' class="form-select" aria-label="Default select example">
+                                        <option selected>Змінити постачальника</option>
+                                        {% for i in o %}
+                                        {% if item.title.title == i.item_title %}
+                                        <option value="{{i.id}}">{{i.provider.title}} |
+                                            {{i}}
+                                        </option>
+                                        {% endif %}
+                                        {% endfor %}
+
+                                    </select>
+
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                            Закрити
+                                        </button>
+                                        <button type="submit" class="btn btn-primary" value="Update">Зберегти
+                                        </button>
+                                    </div>
+                                </form>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#exampleModal1-{{item.id}}">
+                    Видалити
+                </button>
+
+                <!-- Modal to Delete-->
+                <div class="modal fade" id="exampleModal1-{{item.id}}" tabindex="-1"
+                     aria-labelledby="exampleModalLabel"
+                     aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel1">Видалити</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Ви точно бажаєте видалити {{item.title}}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити
+                                </button>
+                                <a href="/manager/order/{{item.kitchen_id}}/delete/{{item.pk}}" type="submit"
+                                   class="btn btn-danger">Видалити</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+
+        </tbody>
+        {% endif %}
+        {% endfor%}
+    </table>
+
+</div>
+</div>
+
+</div>
+{% endblock %}

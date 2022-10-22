@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Оновити базу</button>
+</form>
+
+
+{% endblock %}

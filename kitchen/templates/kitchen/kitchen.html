@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<div class="container-lg">
+    <h1 class="text text-center">Список кухонь:</h1>
+    <div class="row">
+        {% for item in kitchen %}
+        <div class="col-sm-6">
+
+            <div class="card">
+
+                <div class="card-body">
+                    <h5 class="card-title">Назва: {{item.title}}</h5>
+                    <p class="card-text">Адреса: {{item.address}}</p>
+                    <p> Інші дані: {{item.technical_information}}</p>
+                    <a href="{% url 'create_request' item.pk %}" class="btn btn-primary">Заявка на цю кухню</a>
+                </div>
+
+            </div>
+
+        </div>
+        {% empty %}
+        <p>Оновіть базу данних щоб отримати список підприємств!</p>
+
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
