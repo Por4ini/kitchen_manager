@@ -4,7 +4,8 @@
 {% block content %}
 <div>
 
-    {% if time.start|time:"H:i" < my_date|time:"H:i" and my_date|time:"H:i" < time.end|time:"H:i"%}
+    <!--{% if time.start|time:"H:i" < my_date|time:"H:i" and my_date|time:"H:i" < time.end|time:"H:i"%}-->
+        <!--{% endif %}-->
     <h1 class="text-center">{{title}}</h1>
 
     <form action="" , method="post">
@@ -18,7 +19,7 @@
 
 
     </form>
-    {% endif %}
+
     <div>
         <div class="modal fade" id="sendModal-{{forloop.counter0}}" tabindex="-1" aria-labelledby="exampleModalLabel"
              aria-hidden="true">

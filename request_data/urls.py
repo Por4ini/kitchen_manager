@@ -25,3 +25,4 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('', index, name='home')
 ]
+

@@ -69,7 +69,7 @@ class Unit(models.Model):
 
 
 class Order(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True, auto_created=True)
     how_match = models.CharField(max_length=60, verbose_name='Кількість')
     unit = models.ForeignKey('Unit', on_delete=models.CASCADE, null=True, verbose_name='Одиниця виміру')
     title = models.ForeignKey('ProductList', on_delete=models.CASCADE, null=True, verbose_name='Продукт')

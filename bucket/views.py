@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 import pandas as pd
 from platform import python_version
+import imp
 from django.core.mail import send_mail, EmailMessage
 
 
@@ -141,17 +142,18 @@ def to_excel(request, id):
         df_m1 = pd.json_normalize(data_list, max_level=2)
         df_m1.to_excel('my_book.xlsx')
         data_delete = Order.objects.filter(bucket=True)
+        print('Отправляю')
         for item in data_delete:
             if str(item.price_list.provider.id) == str(id):
-                email_message = EmailMessage(f'Заявка. {d1}', 'Заявка в цьому файлі\n', 'kitchen_order@ukr.net', [ item.price_list.provider.email, 'fert1k@icloud.com'])
+                email_message = EmailMessage(f'Заявка. {d1}', 'Заявка в цьому файлі\n', 'order@kitchen-manager.com.ua', ['kitchen_order@ukr.net', item.price_list.provider.email])
                 email_message.attach_file('my_book.xlsx')
                 email_message.send()
                 print('excel відправлений')
                 break
         for item in data_delete:
-            if str(item.price_list.provider.id) == str(id):
+            if str(item.price_list.provider_id) == str(id):
+                print('1')
                 item.delete()
-
 
         return redirect(f'/bucket')
 

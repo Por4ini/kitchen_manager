@@ -22,8 +22,8 @@ def kitchen(request):
 def create_request(request, kitchens_id):
     title = 'Створити заявку'
     time_start = time(00)
-    time_end = time(12)
-    time_end_edit = time(12,40)
+    time_end = time(23,59)
+    time_end_edit = time(23,59)
     timer = {
         'start':time_start,
         'end':time_end,
