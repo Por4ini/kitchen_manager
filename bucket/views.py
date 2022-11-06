@@ -3,7 +3,10 @@ from kitchen.models import *
 from datetime import datetime
 import json
 import pandas as pd
-from platform import python_version
+import openpyxl
+from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
+from openpyxl.utils import get_column_letter
+
 import imp
 from django.core.mail import send_mail, EmailMessage
 
@@ -98,13 +101,13 @@ def to_excel(request, id):
         with open('new_file.json') as json_file:
             json_data = json.load(json_file)
             json_data['id'].clear()
-        json_data["id"].append({"date": d1})
+        json_data["id"].append({"Дата": d1})
 
         for item in set(k):
             for kit in kitchens:
                 if str(item) == str(kit.id):
                     sum = 0
-                    json_data["id"].append({"Підприємство ":
+                    json_data["id"].append({" ":
                         {
                             "Назва": kit.title,
                             "ФОП": kit.technical_information,
@@ -115,16 +118,17 @@ def to_excel(request, id):
                         if int(order.price_list.provider_id) == int(id) and order.kitchen_id == kit.id:
                             a = float(order.price_list.price) * float(order.how_match)
                             sum += a
-                            json_data["id"].append({"Продукт ":
+                            json_data["id"].append({"-"
+                                                    "git ":
                                 {
-                                    "Найменування": order.price_list.item_title,
+                                    "Продукт": order.price_list.item_title,
                                     "Кількість": order.how_match,
-                                    "Одиниця виміру": order.unit.title,
+                                    "Од. виміру": order.unit.title,
                                     "Ціна, грн": float(order.price_list.price),
                                     "Сума, грн": a,
                                 }})
                     if sum != 0:
-                        json_data["id"].append({"Загальна сума ":
+                        json_data["id"].append({"Загальна ":
                             {
                                 'Сумма': sum
                             }})
@@ -140,13 +144,35 @@ def to_excel(request, id):
         data_list = data['id']
 
         df_m1 = pd.json_normalize(data_list, max_level=2)
-        df_m1.to_excel('my_book.xlsx')
+        df_m1.to_excel('Заявка.xlsx')
+        wb = openpyxl.load_workbook('Заявка.xlsx')
+        sheet = wb.active
+        sheet.column_dimensions['A'].width = 2
+        sheet.column_dimensions['B'].width = 9
+        sheet.column_dimensions['C'].width = 12
+        sheet.column_dimensions['D'].width = 12
+        sheet.column_dimensions['E'].width = 12
+        sheet.column_dimensions['F'].width = 12
+        sheet.column_dimensions['G'].width = 10
+        sheet.column_dimensions['H'].width = 12
+        sheet.column_dimensions['I'].width = 9
+        sheet.column_dimensions['J'].width = 12
+        sheet.column_dimensions['K'].width = 14
+        row_count = sheet.max_row
+        for i in range(1, row_count + 1):
+            sheet.row_dimensions[i].height = 25
+
+
+
+        wb.save("Заявка.xlsx")
+        print('0')
         data_delete = Order.objects.filter(bucket=True)
         print('Отправляю')
         for item in data_delete:
             if str(item.price_list.provider.id) == str(id):
-                email_message = EmailMessage(f'Заявка. {d1}', 'Заявка в цьому файлі\n', 'order@kitchen-manager.com.ua', ['kitchen_order@ukr.net', item.price_list.provider.email])
-                email_message.attach_file('my_book.xlsx')
+                email_message = EmailMessage(f'Заявка. {d1}', 'Заявка в цьому файлі\n', 'order@kitchen-manager.com.ua',
+                                             ['kitchen_order@ukr.net', item.price_list.provider.email])
+                email_message.attach_file('Заявка.xlsx')
                 email_message.send()
                 print('excel відправлений')
                 break
@@ -158,3 +184,55 @@ def to_excel(request, id):
         return redirect(f'/bucket')
 
     return redirect(request, f'/bucket/{id}', {'my_date': datetime.now()})
+
+
+def delete_order(request, id, pk):
+    this_order = Order.objects.filter(id=pk)
+    this_order.delete()
+    return redirect(f'/bucket/{id}')
+
+
+def plus(request, id, pk):
+    this_order = Order.objects.filter(id=pk)
+    print(id)
+    print(pk)
+    for item in this_order:
+        order = Order(
+            id=item.id,
+            how_match=float(item.how_match) + 1,
+            chef=item.chef,
+            kitchen_id=item.kitchen.id,
+            unit=item.unit,
+            title=item.title,
+            price_list_id=item.price_list.id,
+            send=item.send,
+            bucket=item.bucket,
+            to_prov=item.to_prov,
+        )
+
+        order.save()
+        return redirect(f'/bucket/{id}')
+    return redirect(f'/bucket/{id}')
+
+
+def minus(request, id, pk):
+    this_order = Order.objects.filter(id=pk)
+    print(id)
+    print(pk)
+    for item in this_order:
+        order = Order(
+            id=item.id,
+            how_match=float(item.how_match) - 1,
+            chef=item.chef,
+            kitchen_id=item.kitchen.id,
+            unit=item.unit,
+            title=item.title,
+            price_list_id=item.price_list.id,
+            send=item.send,
+            bucket=item.bucket,
+            to_prov=item.to_prov,
+        )
+
+        order.save()
+        return redirect(f'/bucket/{id}')
+    return redirect(f'/bucket/{id}')

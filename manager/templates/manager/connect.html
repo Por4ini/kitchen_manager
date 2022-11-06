@@ -2,11 +2,11 @@
 {% block title %}{{title}}{% endblock %}
 
 {% block content %}
-
+{%if request.user.is_staff == 1%}
 <form method="post">
     {% csrf_token %}
     <button type="submit" class="btn btn-primary">Оновити базу</button>
 </form>
-
+{% endif %}
 
 {% endblock %}

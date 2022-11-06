@@ -11,12 +11,12 @@
         <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
             <div class="position-sticky pt-3 sidebar-sticky">
                 <ul class="nav flex-column">
-                    
+
                     <li class="nav-item"><h5 class="text " aria-current="page">Заявки:
                     </h5>
                     </li>
                     {% for key,value in prov.items %}
-                    
+
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="{{key}}">{{value}}
                         </a>
@@ -72,78 +72,124 @@
                             </div>
                         </div>
                     </div>
-                </div>
+            </div>
 
-                </h3>
-                <h2>Загальна сума заявок: {{total}} грн.</h2>
+            </h3>
+            <h2>Загальна сума заявок: {{total}} грн.</h2>
 
 
-                {% for k_id in kitchens_id %}
-                {% for item in kitchens %}
-                {% if item.id == k_id %}
-                <p>Дата заявки: {{my_date|date:"d.m.Y"}}</p>
-                <p>Підприємство: {{item.title}} </p>
-                <p>ФОП: {{item.technical_information}}</p>
-                <p>Адреса доставки: {{item.address}} </p>
+            {% for k_id in kitchens_id %}
+            {% for item in kitchens %}
+            {% if item.id == k_id %}
+            <p>Дата заявки: {{my_date|date:"d.m.Y"}}</p>
+            <p>Підприємство: {{item.title}} </p>
+            <p>ФОП: {{item.technical_information}}</p>
+            <p>Адреса доставки: {{item.address}} </p>
+            {% endif %}
+            {% endfor %}
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Найменування</th>
+                    <th>Кількість</th>
+                    <th>Одиниця виміру</th>
+                    <th>Ціна, грн</th>
+                    <th>Сума, грн</th>
+                    <th></th>
+
+                </tr>
+
+                </thead>
+                {% for item in data %}
+                {% if item.kitchen.id == k_id and item.price_list.provider.id == id %}
+                <tbody>
+                <tr>
+                    <td>{{item.title}}</td>
+                    <td>
+                        <a role="button"  class="btn" href="/bucket/{{item.price_list.provider.id}}/minus/{{item.pk}}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-dash" viewBox="0 0 16 16">
+                                <path d="M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z"/>
+                            </svg>
+                            <i class="bi bi-dash"></i></a>
+                          {{item.how_match}}
+                        <a role="button"  class="btn" href="/bucket/{{item.price_list.provider.id}}/plus/{{item.pk}}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-plus" viewBox="0 0 16 16">
+                                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+                            </svg>
+                            <i class="bi bi-plus"></i></a>
+                    </td>
+                    <td>{{item.unit}}</td>
+                    <td>{{item.price_list.price|floatformat}}</td>
+                    {% with answer=item.how_match %}
+                    <td>{{ answer|mul:item.price_list.price }}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal1-{{item.id}}">
+                            Видалити
+                        </button>
+
+                        <!-- Modal to Delete-->
+                        <div class="modal fade" id="exampleModal1-{{item.id}}" tabindex="-1"
+                             aria-labelledby="exampleModalLabel"
+                             aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel1">Видалити</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Ви точно бажаєте видалити {{item.title}}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити
+                                        </button>
+                                        <a role="button"
+                                           href="/bucket/{{item.price_list.provider.id}}/delete/{{item.pk}}"
+                                           class="btn btn-danger">Видалити</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    {% endwith %}
+
+                </tr>
+                </tbody>
                 {% endif %}
                 {% endfor %}
-
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Найменування</th>
-                        <th>Кількість</th>
-                        <th>Одиниця виміру</th>
-                        <th>Ціна, грн</th>
-                        <th>Сума, грн</th>
-
-                    </tr>
-
-                    </thead>
-                    {% for item in data %}
-                    {% if item.kitchen.id == k_id and item.price_list.provider.id == id %}
-                    <tbody>
-                    <tr>
-                        <td>{{item.title}}</td>
-                        <td>{{item.how_match}}</td>
-                        <td>{{item.unit}}</td>
-                        <td>{{item.price_list.price|floatformat}}</td>
-                        {% with answer=item.how_match %}
-                        <td>{{ answer|mul:item.price_list.price }}</td>
-                        {% endwith %}
-
-                    </tr>
-                    </tbody>
+                <tfoot>
+                <tr>
+                    <td>Сума:</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    {% for key1,value1 in values.items %}
+                    {% for item_dict in value1 %}
+                    {%for kit4en, sum in item_dict.items %}
+                    {% if kit4en == k_id and key1 == id %}
+                    <td>{{ sum }}</td>
                     {% endif %}
                     {% endfor %}
-                    <tfoot>
-                    <tr>
-                        <td>Сума:</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        {% for key1,value1 in values.items %}
-                        {% for item_dict in value1 %}
-                        {%for kit4en, sum in item_dict.items %}
-                        {% if kit4en == k_id and key1 == id %}
-                        <td>{{ sum }}</td>
-                        {% endif %}
-                        {% endfor %}
-                        {% endfor %}
-                        {% endfor %}
+                    {% endfor %}
+                    {% endfor %}
 
 
-                    </tr>
-                    </tfoot>
-                </table>
-                <p>
-                    ******************************************************************************************************************************************************************</p>
-                {% endfor %}
-            </div>
-        </main>
-        {% endif %}
-        {% endfor %}
+                </tr>
+                </tfoot>
+            </table>
+            <p>
+                ******************************************************************************************************************************************************************</p>
+            {% endfor %}
     </div>
+    </main>
+    {% endif %}
+    {% endfor %}
+</div>
 </div>
 
 {% endblock %}

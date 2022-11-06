@@ -88,7 +88,7 @@ WSGI_APPLICATION = 'request_data.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': 'localhost',
+        'HOST': '195.54.163.133',
         'NAME': 'h54453c_MyData',
         'USER': 'h54453c_por4ini',
         'PASSWORD': 'Itred19841',

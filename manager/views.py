@@ -117,3 +117,4 @@ def to_bucket(request, id):
         return redirect(f'/manager/order/{id}', {'data': data})
 
     return redirect(f'/manager/order/{id}', {'data': data})
+
