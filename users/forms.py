@@ -20,6 +20,11 @@ class UserRegisterForm(UserCreationForm):
         fields = ('username', 'password1', 'password2', 'first_name', 'last_name')
 
 class UserLoginForm(AuthenticationForm):
-    username = forms.CharField(label='Нікнейм користувача', widget=forms.TextInput(attrs={'class': 'form-control'}))
-    password = forms.CharField(label='Ваш пароль',
-                                widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    username = forms.CharField(label='', widget=forms.TextInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'User login'
+    }))
+    password = forms.CharField(label='', widget=forms.PasswordInput(attrs={
+        'class': 'form-control',
+        'placeholder': 'Password'
+    }))
