@@ -2,10 +2,13 @@
 {% block title %}{{title}}{% endblock %}
 
 {% block content %}
-<h1>Авторизація</h1>
-<form method="post">
+<p class="h3">Авторизація</p>
+<div class="container-sm text-right" style="max-width: 60%">
+    <form method="post">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Увійти</button>
-</form>
+        <button type="submit" class="btn btn-primary">Увійти</button>
+    </form>
+</div>
+
 {% endblock %}
