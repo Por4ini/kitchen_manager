@@ -2,29 +2,34 @@
 {% block title %}{{title}}{% endblock %}
 
 {% block content %}
-<div class="container-lg">
-    <h1 class="text text-center">Список кухонь:</h1>
-    <div class="row">
-        {% for item in kitchen %}
-        <div class="col-sm-6">
-
-            <div class="card">
-
-                <div class="card-body">
-                    <h5 class="card-title">Назва: {{item.title}}</h5>
-                    <p class="card-text">Адреса: {{item.address}}</p>
-                    <p> Інші дані: {{item.technical_information}}</p>
-                    <a href="{% url 'create_request' item.pk %}" class="btn btn-primary">Заявка на цю кухню</a>
-                </div>
-
-            </div>
-
-        </div>
-        {% empty %}
-        <p>Оновіть базу данних щоб отримати список підприємств!</p>
-
-        {% endfor %}
-    </div>
+<div class="container-sm">
+    <p class="h3">Підприємства</p>
+    <table class="table">
+          <thead>
+                <tr>
+                    <th scope="col">Назва</th>
+                    <th scope="col">Адреса</th>
+                    <th scope="col">ТОВ</th>
+                    <th scope="col">Опції</th>
+                </tr>
+          </thead>
+          <tbody>
+          {% for item in kitchen %}
+                <tr>
+                    <td><strong>{{item.title}}</strong></td>
+                    <td>{{item.address}}</td>
+                    <td>{{item.technical_information}}</td>
+                    <td>
+                        <a class="text-decoration-none" href="{% url 'create_request' item.pk %}" title="Замовити">
+                            <i class="bi bi-bag-fill px-1"></i>
+                        </a>
+                    </td>
+                </tr>
+          {% empty %}
+                <p>Оновіть базу данних щоб отримати список підприємств!</p>
+          {% endfor %}
+         </tbody>
+    </table>
 </div>
 
 {% endblock %}
