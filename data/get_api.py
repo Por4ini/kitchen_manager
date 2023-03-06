@@ -6,10 +6,15 @@ import traceback
 
 def get_kitchen():
     try:
-        conn = mysql.connector.connect(host='localhost',
+        # conn = mysql.connector.connect(host='localhost',
+        #                                database='h54453c_MyData',
+        #                                user='h54453c_por4ini',
+        #                                password='Itred19841', )
+        conn = mysql.connector.connect(host='195.54.163.133',
                                        database='h54453c_MyData',
                                        user='h54453c_por4ini',
                                        password='Itred19841', )
+
 
         c = conn.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS kitchens 

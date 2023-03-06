@@ -1,5 +1,5 @@
 from django.db import models
-from datetime import date
+from datetime import datetime, timedelta
 
 class Kitchens(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -48,6 +48,7 @@ class PriceList(models.Model):
 
 class ProductList(models.Model):
     title = models.CharField(max_length=60, blank=True, null=True)
+    unit = models.CharField(max_length=60, blank=True, null=True)
 
     def __str__(self):
         return self.title
@@ -75,6 +76,7 @@ class Order(models.Model):
     title = models.ForeignKey('ProductList', on_delete=models.CASCADE, null=True, verbose_name='Продукт')
     chef = models.CharField(max_length=100)
     date = models.DateTimeField(auto_now=True, auto_now_add=False)
+    delivery_date = models.DateTimeField(default=datetime.today() + timedelta(days=1))
     price_list = models.ForeignKey('PriceList', on_delete=models.CASCADE, null=True, verbose_name='Ціна/Постачальник')
     send = models.BooleanField(default=False)
     bucket = models.BooleanField(default=False)

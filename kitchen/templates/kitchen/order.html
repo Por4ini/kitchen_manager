@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}{{title}}{% endblock %}
+{% block content %}
+
+
+<table class="table">
+    <thead>
+    <tr>
+        <th>Кількість</th>
+        <th>Одиниця виміру</th>
+        <th>Продукт</th>
+        <th>Шеф</th>
+        <th>Дата доставки</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    {% for order in orders %}
+    {% if order.send == False %}
+    <tr>
+        <td>{{ order.how_match }}</td>
+        <td>{{ order.unit }}</td>
+        <td>{{ order.title }}</td>
+        <td>{{ order.chef }}</td>
+        <td>{{ order.delivery_date }}</td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
+

@@ -1,10 +1,8 @@
 from django.shortcuts import render, redirect
-import sqlite3
-from django.http import HttpResponse
 from .models import *
 from .forms import *
 from datetime import datetime, time
-
+import pytz
 
 # Create your views here.
 
@@ -18,68 +16,104 @@ def kitchen(request):
     kitchen = Kitchens.objects.all()
     return render(request, 'kitchen/kitchen.html', {'title': title, 'kitchen': kitchen})
 
-
 def create_request(request, kitchens_id):
     title = 'Створити заявку'
-    time_start = time(00)
-    time_end = time(23,59)
-    time_end_edit = time(23,59)
-    timer = {
-        'start':time_start,
-        'end':time_end,
-        'end_edit':time_end_edit,
-    }
-    kitchen = Kitchens.objects.filter(id=kitchens_id)
-    data = Order.objects.filter(kitchen_id=kitchens_id)
-    for item in kitchen:
+    orders = Order.objects.filter(kitchen_id=kitchens_id)
+    dates = Order.objects.filter(kitchen_id=kitchens_id).values_list('date', flat=True).distinct().order_by('date')
+    unique_dates = list(set([datetime.strftime(date, '%Y-%m-%d') for date in dates]))
+    unique_dates.sort()
 
-        if request.method == 'POST':
-            form = OrderForm(request.POST)
-            if form.is_valid():
-                instance = form.save(commit=False)
-                instance.chef = request.user.first_name + " " + request.user.last_name
-                instance.kitchen_id = item.id
-                instance.save()
-        else:
-            form = OrderForm()
-    return render(request, 'kitchen/create_request.html',
-                  {'time':timer, 'title': title, 'form': form, 'kitchen': kitchen,'kitchens_id':kitchens_id, 'data': data, 'my_date': datetime.now()})
-
-
-def edit(request, kitchens_id):
-    data = Order.objects.filter(kitchen_id=kitchens_id)
-
-    return redirect(request, 'kitchen/create_request.html', {'data': data})
-
-
-def update(request, kitchens_id, id):
+    product_list = ProductList.objects.all()
+    my_date = datetime.now(tz=pytz.timezone('Europe/Kiev'))
     if request.method == 'POST':
-        how_match = request.POST.get('how_match')
-        kitchens = Kitchens.objects.filter(id=kitchens_id)
-        this_order = Order.objects.filter(pk=id)
-        for title in this_order:
-            order = Order(
-                id=id,
-                how_match=how_match,
-                chef=request.user.first_name + " " +  request.user.last_name,
-                kitchen_id=title.kitchen.id,
-                unit=title.unit,
-                title=title.title
-            )
+        for product in product_list:
+            how_match = request.POST.get(product.title)
+            if how_match != '0':
+                how_match = how_match
+                product = ProductList.objects.get(title=product.title)
+                print(how_match)
+                print(product.id)
+                Order.objects.create(
+                    how_match=how_match,
+                    unit_id=59,
+                    title_id=product.id,
+                    chef= request.user.first_name + " " + request.user.last_name,
+                    kitchen_id=kitchens_id
+                )
 
-            order.save()
         return redirect(f'/kitchen/create_request/{kitchens_id}')
-    return redirect(request, f'/kitchen/create_request/{kitchens_id}')
 
+    return render(request, 'kitchen/create_request.html',
+                      {'unique_dates': unique_dates, 'my_date':my_date, 'title': title, 'kitchens_id': kitchens_id, 'orders': orders,'product_list':product_list})
 
-def delete(request, id, kitchens_id):
-    kitchens = Kitchens.objects.filter(id=kitchens_id)
-    for item in kitchens:
-        kitchens_id = item.id
-        data = Order.objects.filter(id=id)
-        data.delete()
-        return redirect(f'/kitchen/create_request/{kitchens_id}')
-    return redirect(request, f'/kitchen/create_request/{kitchens_id}')
+def order_archive(request, kitchens_id, date):
+    orders = Order.objects.filter(kitchen_id=kitchens_id)
+    title = 'Архів замовлень'
+    return render(request, 'kitchen/order.html',
+                  {'title': title, 'kitchens_id': kitchens_id,
+                   'orders': orders, 'filter_date':date})
+
+    # def create_request(request, kitchens_id):
+#     title = 'Створити заявку'
+#     time_start = time(00)
+#     time_end = time(23,59)
+#     time_end_edit = time(23,59)
+#     timer = {
+#         'start':time_start,
+#         'end':time_end,
+#         'end_edit':time_end_edit,
+#     }
+#     kitchen = Kitchens.objects.filter(id=kitchens_id)
+#     data = Order.objects.filter(kitchen_id=kitchens_id)
+#     for item in kitchen:
+#
+#         if request.method == 'POST':
+#             form = OrderForm(request.POST)
+#             if form.is_valid():
+#                 instance = form.save(commit=False)
+#                 instance.chef = request.user.first_name + " " + request.user.last_name
+#                 instance.kitchen_id = item.id
+#                 instance.save()
+#         else:
+#             form = OrderForm()
+#     return render(request, 'kitchen/create_request.html',
+#                   {'time':timer, 'title': title, 'form': form, 'kitchen': kitchen,'kitchens_id':kitchens_id, 'data': data, 'my_date': datetime.now()})
+
+#
+# def edit(request, kitchens_id):
+#     data = Order.objects.filter(kitchen_id=kitchens_id)
+#
+#     return redirect(request, 'kitchen/create_request.html', {'data': data})
+#
+#
+# def update(request, kitchens_id, id):
+#     if request.method == 'POST':
+#         how_match = request.POST.get('how_match')
+#         kitchens = Kitchens.objects.filter(id=kitchens_id)
+#         this_order = Order.objects.filter(pk=id)
+#         for title in this_order:
+#             order = Order(
+#                 id=id,
+#                 how_match=how_match,
+#                 chef=request.user.first_name + " " +  request.user.last_name,
+#                 kitchen_id=title.kitchen.id,
+#                 unit=title.unit,
+#                 title=title.title
+#             )
+#
+#             order.save()
+#         return redirect(f'/kitchen/create_request/{kitchens_id}')
+#     return redirect(request, f'/kitchen/create_request/{kitchens_id}')
+#
+#
+# def delete(request, id, kitchens_id):
+#     kitchens = Kitchens.objects.filter(id=kitchens_id)
+#     for item in kitchens:
+#         kitchens_id = item.id
+#         data = Order.objects.filter(id=id)
+#         data.delete()
+#         return redirect(f'/kitchen/create_request/{kitchens_id}')
+#     return redirect(request, f'/kitchen/create_request/{kitchens_id}')
 
 
 def send_order(request, kitchens_id):
