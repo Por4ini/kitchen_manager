@@ -1,5 +1,7 @@
 from django.db import models
 from datetime import datetime, timedelta
+import pytz
+
 
 class Kitchens(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -75,8 +77,8 @@ class Order(models.Model):
     unit = models.ForeignKey('Unit', on_delete=models.CASCADE, null=True, verbose_name='Одиниця виміру')
     title = models.ForeignKey('ProductList', on_delete=models.CASCADE, null=True, verbose_name='Продукт')
     chef = models.CharField(max_length=100)
-    date = models.DateTimeField(auto_now=True, auto_now_add=False)
-    delivery_date = models.DateTimeField(default=datetime.today() + timedelta(days=1))
+    date = models.DateTimeField(default=pytz.timezone('Europe/Kyiv').localize(datetime.now()))
+    delivery_date = models.DateTimeField(default=pytz.timezone('Europe/Kyiv').localize(datetime.now()) + timedelta(days=1))
     price_list = models.ForeignKey('PriceList', on_delete=models.CASCADE, null=True, verbose_name='Ціна/Постачальник')
     send = models.BooleanField(default=False)
     bucket = models.BooleanField(default=False)

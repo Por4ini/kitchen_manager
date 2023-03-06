@@ -22,7 +22,6 @@ def create_request(request, kitchens_id):
     dates = Order.objects.filter(kitchen_id=kitchens_id).values_list('date', flat=True).distinct().order_by('date')
     unique_dates = list(set([datetime.strftime(date, '%Y-%m-%d') for date in dates]))
     unique_dates.sort()
-
     product_list = ProductList.objects.all()
     my_date = datetime.now(tz=pytz.timezone('Europe/Kiev'))
     if request.method == 'POST':
@@ -49,9 +48,10 @@ def create_request(request, kitchens_id):
 def order_archive(request, kitchens_id, date):
     orders = Order.objects.filter(kitchen_id=kitchens_id)
     title = 'Архів замовлень'
+    filter_date = datetime.strptime(date, '%Y-%m-%d')
     return render(request, 'kitchen/order.html',
                   {'title': title, 'kitchens_id': kitchens_id,
-                   'orders': orders, 'filter_date':date})
+                   'orders': orders, 'filter_date': filter_date})
 
     # def create_request(request, kitchens_id):
 #     title = 'Створити заявку'

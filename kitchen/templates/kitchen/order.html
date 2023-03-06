@@ -17,6 +17,8 @@
 
     {% for order in orders %}
     {% if order.send == False %}
+    {% if order.date|date:"Y-m-d" == filter_date|date:"Y-m-d" %}
+
     <tr>
         <td>{{ order.how_match }}</td>
         <td>{{ order.unit }}</td>
@@ -24,6 +26,7 @@
         <td>{{ order.chef }}</td>
         <td>{{ order.delivery_date }}</td>
     </tr>
+    {% endif %}
     {% endif %}
     {% endfor %}
     </tbody>

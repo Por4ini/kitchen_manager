@@ -13,7 +13,8 @@ def get_kitchen():
         conn = mysql.connector.connect(host='195.54.163.133',
                                        database='h54453c_MyData',
                                        user='h54453c_por4ini',
-                                       password='Itred19841', )
+                                       password='Itred19841',
+                                       charset='latin1')
 
 
         c = conn.cursor()
