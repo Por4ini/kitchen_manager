@@ -30,11 +30,9 @@ def create_request(request, kitchens_id):
             if how_match != '0':
                 how_match = how_match
                 product = ProductList.objects.get(title=product.title)
-                print(how_match)
-                print(product.id)
                 Order.objects.create(
                     how_match=how_match,
-                    unit_id=59,
+                    unit=product.unit,
                     title_id=product.id,
                     chef= request.user.first_name + " " + request.user.last_name,
                     kitchen_id=kitchens_id
@@ -123,28 +121,33 @@ def send_order(request, kitchens_id):
     if request.method == 'POST':
 
         for item in data:
-            price = PriceList.objects.filter(item_title=item.title.title)
-            a = []
-            price_id = []
-            for ti in price:
-                if float(ti.price) == 0.0:
-                    print('Нахуй')
-                else:
-                    a.append(float(ti.price))
-            a = min(a)
-            for i in price:
-                if str(a) in str(i.price):
-                    price_id.append(i.id)
+            price = PriceList.objects.filter(item_title=item.title.title).exclude(price=0)
+            sorted_bananas = price.order_by('price')
+            # Взяти перший рядок з відфільтрованого та відсортованого списку
+            cheapest_banana = sorted_bananas.first()
+            # Повернути найменше значення прайсу для умовного банана
+            price_id = cheapest_banana.id
+            # a = []
+            # price_id = []
+            # for ti in price:
+            #     if float(ti.price) == 0.0:
+            #         print('Нахуй')
+            #     else:
+            #         a.append(float(ti.price))
+            # a = min(a)
+            # for i in price:
+            #     if str(a) in str(i.price):
+            #         price_id.append(i.id)
 
             order = Order(
                 id=item.id,
                 how_match=item.how_match,
                 chef=item.chef,
                 kitchen_id=item.kitchen.id,
-                unit_id=item.unit.id,
+                unit=item.unit,
                 title_id=item.title.id,
                 send=True,
-                price_list_id=price_id[0],
+                price_list_id=price_id,
                 bucket=item.bucket,
             )
             order.save()

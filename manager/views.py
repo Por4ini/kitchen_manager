@@ -1,11 +1,9 @@
 from django.shortcuts import render, redirect
-from data.get_api import *
 from django.contrib import messages
 from kitchen.models import *
-from datetime import datetime
-
-
-# Create your views here.
+from data.kitchen_update import get_kitchen
+from data.provider_update import get_provider
+from data.price_list_update import get_price_list
 
 def get_req(request):
     title = 'Створеня заявки'
@@ -87,13 +85,15 @@ def delete_order(request, id, pk):
 
 def connect(request):
     title = 'Оновлення бази'
+
     if request.method == 'POST':
-        if get_kitchen() and get_provider() == True:
+
+
+        if get_kitchen(Kitchens) and get_provider(Provider) and get_price_list(Provider, PriceList, ProductList) == True:
+
             messages.success(request, 'База успішно оновлена!')
-            print('true')
         else:
             messages.error(request, 'Помилка оновлення бази, зверніться до розробника.')
-            print('false')
 
     return render(request, 'manager/connect.html', {'title': title})
 
@@ -105,7 +105,7 @@ def to_bucket(request, id):
             order = Order(
                 id=item.id,
                 how_match=item.how_match,
-                unit_id=item.unit.id,
+                unit=item.unit,
                 title_id=item.title.id,
                 kitchen_id=item.kitchen.id,
                 chef=item.chef,
@@ -117,4 +117,3 @@ def to_bucket(request, id):
         return redirect(f'/manager/order/{id}', {'data': data})
 
     return redirect(f'/manager/order/{id}', {'data': data})
-

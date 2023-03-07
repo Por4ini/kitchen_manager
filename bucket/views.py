@@ -67,12 +67,16 @@ def create_order(request, id):
                     values[item].append({
                         kit.id: sum
                     })
+
             total_sum1 = total_sum
-
-    return render(request, 'bucket/index.html',
-                  {'kitchens': kitchens, 'kitchens_id': set(k), 'title': title, 'prov': prov, 'data': data,
-                   'my_date': datetime.now(), 'id': int(id), 'values': values, 'total': total_sum1})
-
+    try:
+        return render(request, 'bucket/index.html',
+                      {'kitchens': kitchens, 'kitchens_id': set(k), 'title': title, 'prov': prov, 'data': data,
+                       'my_date': datetime.now(), 'id': int(id), 'values': values, 'total': total_sum1})
+    except:
+        return render(request, 'bucket/index.html',
+                      {'kitchens': kitchens, 'kitchens_id': set(k), 'title': title, 'prov': prov, 'data': data,
+                       'my_date': datetime.now(), 'id': int(id), 'values': values,})
 
 def to_excel(request, id):
     today = datetime.now()
@@ -161,8 +165,6 @@ def to_excel(request, id):
         row_count = sheet.max_row
         for i in range(1, row_count + 1):
             sheet.row_dimensions[i].height = 25
-
-
 
         wb.save("Заявка.xlsx")
         print('0')

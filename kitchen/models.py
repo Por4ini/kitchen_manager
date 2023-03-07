@@ -1,19 +1,23 @@
 from django.db import models
 from datetime import datetime, timedelta
-import pytz
+from django.utils import timezone
+
+
+order_time = timezone.now()
+delivery_time = order_time + timedelta(days=1)
 
 
 class Kitchens(models.Model):
     id = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=60, blank=True, null=True)
     address = models.CharField(max_length=60, blank=True, null=True)
-    technical_information = models.CharField(db_column='Technical_Information', max_length=60, blank=True, null=True)  # Field name made lowercase.
+    technical_information = models.CharField(db_column='Technical_Information', max_length=60, blank=True, null=True)
 
     def _str_(self):
         return self.title
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'kitchens'
 
 
@@ -21,7 +25,6 @@ class Kitchens(models.Model):
 class Provider(models.Model):
     id = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=60, blank=True, null=True)
-    code = models.CharField(max_length=60, blank=True, null=True)
     email = models.CharField(max_length=60, blank=True, null=True)
     have_price = models.BooleanField(default=False)
 
@@ -74,11 +77,11 @@ class Unit(models.Model):
 class Order(models.Model):
     id = models.AutoField(primary_key=True, auto_created=True)
     how_match = models.CharField(max_length=60, verbose_name='Кількість')
-    unit = models.ForeignKey('Unit', on_delete=models.CASCADE, null=True, verbose_name='Одиниця виміру')
+    unit = models.CharField(max_length=60, verbose_name='Одиниця виміру')
     title = models.ForeignKey('ProductList', on_delete=models.CASCADE, null=True, verbose_name='Продукт')
     chef = models.CharField(max_length=100)
-    date = models.DateTimeField(default=pytz.timezone('Europe/Kyiv').localize(datetime.now()))
-    delivery_date = models.DateTimeField(default=pytz.timezone('Europe/Kyiv').localize(datetime.now()) + timedelta(days=1))
+    date = models.DateTimeField(default=order_time)
+    delivery_date = models.DateTimeField(default=delivery_time)
     price_list = models.ForeignKey('PriceList', on_delete=models.CASCADE, null=True, verbose_name='Ціна/Постачальник')
     send = models.BooleanField(default=False)
     bucket = models.BooleanField(default=False)
