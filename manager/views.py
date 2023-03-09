@@ -90,7 +90,6 @@ def connect(request):
 
 
         if get_kitchen(Kitchens) and get_provider(Provider) and get_price_list(Provider, PriceList, ProductList) == True:
-
             messages.success(request, 'База успішно оновлена!')
         else:
             messages.error(request, 'Помилка оновлення бази, зверніться до розробника.')
