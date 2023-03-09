@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Оновити список постачальників</button>
+    </form>
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Назва</th>
+            <th>Email</th>
+            <th>Активний</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for provider in p_user %}
+        {% if provider.last_name %}
+        <tr>
+             <td>{{ provider.first_name }}</td>
+            <td>{{ provider.email }}</td>
+            {% if provider.is_active %}
+            <td><span class="badge bg-success">Активний</span></td>
+            {% else %}
+            <td>
+                <form method="post" action="{% url 'activate_provider' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="username" value="{{ provider.username }}">
+                    <button type="submit" class="btn btn-danger">Активувати</button>
+                </form>
+            </td>
+            {% endif %}
+        </tr>
+        {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}

@@ -46,8 +46,10 @@ INSTALLED_APPS = [
     'manager',
     'bucket',
     'mathfilters',
+    'provider',
 
 ]
+
 
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',

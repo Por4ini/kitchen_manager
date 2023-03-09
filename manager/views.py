@@ -114,6 +114,7 @@ def to_bucket(request, id):
                 bucket=True,
             )
             order.save()
-        return redirect(f'/manager/order/{id}', {'data': data})
+        return redirect(f'/'
+                        f'/order/{id}', {'data': data})
 
     return redirect(f'/manager/order/{id}', {'data': data})

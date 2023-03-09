@@ -196,8 +196,6 @@ def delete_order(request, id, pk):
 
 def plus(request, id, pk):
     this_order = Order.objects.filter(id=pk)
-    print(id)
-    print(pk)
     for item in this_order:
         order = Order(
             id=item.id,

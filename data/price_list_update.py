@@ -41,12 +41,12 @@ def get_price_list(Provider, PriceList, ProductList):
 
                 except Exception as e:
                     print(f'Неповна інформація по товару: \n {e}')
-        for item in unique_items:
-            item_title = item['item_title']
-            unit = item['unit']
-            print(item_title, unit)
-            ProductList.objects.create(title=item['item_title'], unit=item['unit'])
+            for item in unique_items:
+                item_title = item['item_title']
+                unit = item['unit']
+                print(item_title, unit)
+                ProductList.objects.create(title=item['item_title'], unit=item['unit'])
 
-        return True
+            return True
     except Exception as e:
         print(f'Помилка... : \n {e}')

@@ -15,8 +15,10 @@ def get_provider(Provider):
                 try:
                     title = data.find('name').string
                     code = data.find('code').string
-                    email = data.find('email').string
-
+                    try:
+                        email = data.find('email').string
+                    except:
+                        email = 'None'
                     provider = {
                         'title': title,
                         'id': int(code),
