@@ -8,17 +8,8 @@ from data.price_list_update import get_price_list
 def get_req(request):
     title = 'Створеня заявки'
     if request.user.is_superuser == 1:
-        data = Order.objects.all()
-        a = []
-        i = {}
-        for item in data:
-            a.append(item.kitchen.id)
-        b = set(a)
-        for int in b:
-            for item in data:
-                if int == item.kitchen.id:
-                    i.update({int: item.kitchen.title})
-                    break
+        data = Order.objects.filter(send=1).values('kitchen__id', 'kitchen__title').distinct()
+        i = {item['kitchen__id']: item['kitchen__title'] for item in data}
     else:
         b = 'Ви не маєте прав на перегляд данної сторінки'
     return render(request, 'manager/index.html', {'title': title, 'b': i})
@@ -26,7 +17,6 @@ def get_req(request):
 
 def get_order(request, id):
     o = PriceList.objects.all()
-
     orders = Order.objects.filter(kitchen_id=id)
     kitchen = Kitchens.objects.filter(pk=id)
     data = Order.objects.all()
@@ -99,21 +89,22 @@ def connect(request):
 
 def to_bucket(request, id):
     data = Order.objects.filter(kitchen_id=id)
-    if request.method == 'POST':
-        for item in data:
-            order = Order(
-                id=item.id,
-                how_match=item.how_match,
-                unit=item.unit,
-                title_id=item.title.id,
-                kitchen_id=item.kitchen.id,
-                chef=item.chef,
-                price_list_id=item.price_list.id,
-                send=True,
-                bucket=True,
-            )
-            order.save()
-        return redirect(f'/'
-                        f'/order/{id}', {'data': data})
-
-    return redirect(f'/manager/order/{id}', {'data': data})
+    if data.filter(send=True).exists(): # перевірка чи є записи з полем send=1
+        if request.method == 'POST':
+            for item in data:
+                order = Order(
+                    id=item.id,
+                    how_match=item.how_match,
+                    unit=item.unit,
+                    title_id=item.title.id,
+                    kitchen_id=item.kitchen.id,
+                    chef=item.chef,
+                    price_list_id=item.price_list.id,
+                    send=True,
+                    bucket=True,
+                )
+                order.save()
+            return redirect('request')
+        return render(request, 'manager/to_bucket.html', {'data': data})
+    else: # якщо записів з полем send=1 немає, редірект на сторінку
+        return redirect('request')

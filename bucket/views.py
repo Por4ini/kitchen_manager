@@ -15,6 +15,10 @@ from django.core.mail import send_mail, EmailMessage
 def bucket(request):
     title = 'Кошик'
     data = Order.objects.filter(bucket=True)
+    first_order = data.first()
+    date = first_order.date
+    delivery_date = first_order.delivery_date
+
     i = []
     prov = {}
     for item in data:
@@ -24,12 +28,15 @@ def bucket(request):
             if num == item.price_list.provider.id:
                 prov.update(({num: item.price_list.provider.title}))
                 break
-    return render(request, 'bucket/index.html', {'title': title, 'prov': prov, 'data': data, 'my_date': datetime.now()})
+    return render(request, 'bucket/index.html', {'title': title, 'prov': prov, 'data': data, 'my_date': date, 'delivery_date': delivery_date})
 
 
 def create_order(request, id):
     title = 'Кошик'
     data = Order.objects.filter(bucket=True)
+    order_ = Order.objects.filter(bucket=True, send=True, price_list__provider_id=id).order_by('date', 'delivery_date').first()
+    my_date = order_.date if order_ else None
+    delivery_date = order_.delivery_date if order_ else None
     i = []
     prov = {}
     for item in data:
@@ -72,11 +79,11 @@ def create_order(request, id):
     try:
         return render(request, 'bucket/index.html',
                       {'kitchens': kitchens, 'kitchens_id': set(k), 'title': title, 'prov': prov, 'data': data,
-                       'my_date': datetime.now(), 'id': int(id), 'values': values, 'total': total_sum1})
+                       'my_date': my_date, 'delivery_date': delivery_date, 'id': int(id), 'values': values, 'total': total_sum1})
     except:
         return render(request, 'bucket/index.html',
                       {'kitchens': kitchens, 'kitchens_id': set(k), 'title': title, 'prov': prov, 'data': data,
-                       'my_date': datetime.now(), 'id': int(id), 'values': values,})
+                       'my_date': my_date, 'delivery_date': delivery_date, 'id': int(id), 'values': values,})
 
 def to_excel(request, id):
     today = datetime.now()

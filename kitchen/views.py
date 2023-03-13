@@ -18,6 +18,8 @@ def kitchen(request):
 
 def create_request(request, kitchens_id):
     title = 'Створити заявку'
+    kitchen = Kitchens.objects.get(pk=kitchens_id)
+    title_kitchen = kitchen.title
     orders = Order.objects.filter(kitchen_id=kitchens_id)
     dates = Order.objects.filter(kitchen_id=kitchens_id).values_list('date', flat=True).distinct().order_by('date')
     unique_dates = list(set([datetime.strftime(date, '%Y-%m-%d') for date in dates]))
@@ -41,15 +43,17 @@ def create_request(request, kitchens_id):
         return redirect(f'/kitchen/create_request/{kitchens_id}')
 
     return render(request, 'kitchen/create_request.html',
-                      {'unique_dates': unique_dates, 'my_date':my_date, 'title': title, 'kitchens_id': kitchens_id, 'orders': orders,'product_list':product_list})
+                      {'unique_dates': unique_dates, 'my_date':my_date, 'title': title, 'kitchens_id': kitchens_id, 'orders': orders,'product_list':product_list, 'title_kitchen':title_kitchen})
 
 def order_archive(request, kitchens_id, date):
     orders = Order.objects.filter(kitchen_id=kitchens_id)
     title = 'Архів замовлень'
+    kitchen = Kitchens.objects.get(pk=kitchens_id)
+    title_kitchen = kitchen.title
     filter_date = datetime.strptime(date, '%Y-%m-%d')
     return render(request, 'kitchen/order.html',
                   {'title': title, 'kitchens_id': kitchens_id,
-                   'orders': orders, 'filter_date': filter_date})
+                   'orders': orders, 'filter_date': filter_date, 'title_kitchen':title_kitchen})
 
 
 def send_order(request, kitchens_id):

@@ -43,7 +43,8 @@ def get_price_list(Provider, PriceList, ProductList):
                             item_title = item['item_title']
                             unit = item['unit']
                             print(item_title, unit)
-                            ProductList.objects.create(title=item['item_title'], unit=item['unit'])
+                            if not ProductList.objects.filter(title=item_title).exists():
+                                ProductList.objects.create(title=item_title, unit=unit)
 
             except Exception as e:
                 print(f'Неповна інформація по товару: \n {e}')
