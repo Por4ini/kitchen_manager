@@ -16,7 +16,7 @@ def get_provider(Provider):
                 try:
                     title = data.find('name').string
                     code = data.find('code').string
-                    if '@' in title:
+                    if '@' in str(title):
                         try:
                             email = data.find('email').string
                         except:
