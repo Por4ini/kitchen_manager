@@ -16,26 +16,14 @@ def get_req(request):
 
 
 def get_order(request, id):
-    o = PriceList.objects.all()
+    data = Order.objects.filter(send=1, bucket=0).values('kitchen__id', 'kitchen__title').distinct()
+    i = {item['kitchen__id']: item['kitchen__title'] for item in data}
     orders = Order.objects.filter(kitchen_id=id)
     kitchen = Kitchens.objects.filter(pk=id)
-    data = Order.objects.all()
-    a = []
-    i = {}
-
-    for item in data:
-        a.append(item.kitchen.id)
-    b = set(a)
-    for int in b:
-        for item in data:
-            if int == item.kitchen.id:
-                i.update({int: item.kitchen.title})
-                break
-    if i:
-        return render(request, 'manager/order.html', {'b': i, 'orders': orders, 'kitchen': kitchen, 'o': o, })
+    if orders.exists():
+        return render(request, 'manager/order.html', {'b':i, 'orders': orders, 'kitchen': kitchen,})
     else:
         return redirect('request')
-
 def edit_order(request):
     return redirect(request, 'manager/order.html')
 
@@ -72,7 +60,6 @@ def delete_order(request, id, pk):
     this_order = Order.objects.filter(id=pk)
     this_order.delete()
     return redirect(f'/manager/order/{id}')
-    # return redirect(request, 'manager/order.html')
 
 
 def connect(request):
@@ -82,7 +69,6 @@ def connect(request):
 
 
         if get_kitchen(Kitchens) == True and get_provider(Provider) == True and get_price_list(Provider, PriceList, ProductList) == True:
-        # if get_provider(Provider) == True:
             messages.success(request, 'База успішно оновлена!')
         else:
             messages.error(request, 'Помилка оновлення бази, зверніться до розробника.')
