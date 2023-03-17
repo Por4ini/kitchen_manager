@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 
 
 def get_provider(Provider):
+    print('update provider')
     try:
         a = requests.get(
             'https://bagatolososya-chain-co.iiko.it/resto/api/auth?login=Pavel_B&pass=cd58fb308d0118ea4108da526d8f345e65590205')  # Get token for postavshil
@@ -15,22 +16,23 @@ def get_provider(Provider):
                 try:
                     title = data.find('name').string
                     code = data.find('code').string
-                    try:
-                        email = data.find('email').string
-                    except:
-                        email = 'None'
-                    provider = {
-                        'title': title,
-                        'id': int(code),
-                        'email': email,
-                    }
-                    try:
-                        provider = Provider.objects.get(id=int(code))
-                        provider.title = title
-                        provider.email = email
-                        provider.save()
-                    except Provider.DoesNotExist:
-                        Provider.objects.create(**provider)
+                    if '@' in title:
+                        try:
+                            email = data.find('email').string
+                        except:
+                            email = 'None'
+                        provider = {
+                            'title': title,
+                            'id': int(code),
+                            'email': email,
+                        }
+                        try:
+                            provider = Provider.objects.get(id=int(code))
+                            provider.title = title
+                            provider.email = email
+                            provider.save()
+                        except Provider.DoesNotExist:
+                            Provider.objects.create(**provider)
                 except Exception as e:
                     print(f'Відсутні дані на постачальника в айко {e}')
         return True

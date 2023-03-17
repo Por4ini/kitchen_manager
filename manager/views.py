@@ -8,7 +8,7 @@ from data.price_list_update import get_price_list
 def get_req(request):
     title = 'Створеня заявки'
     if request.user.is_superuser == 1:
-        data = Order.objects.filter(send=1).values('kitchen__id', 'kitchen__title').distinct()
+        data = Order.objects.filter(send=1, bucket=0).values('kitchen__id', 'kitchen__title').distinct()
         i = {item['kitchen__id']: item['kitchen__title'] for item in data}
     else:
         b = 'Ви не маєте прав на перегляд данної сторінки'
@@ -22,6 +22,7 @@ def get_order(request, id):
     data = Order.objects.all()
     a = []
     i = {}
+
     for item in data:
         a.append(item.kitchen.id)
     b = set(a)
@@ -30,9 +31,10 @@ def get_order(request, id):
             if int == item.kitchen.id:
                 i.update({int: item.kitchen.title})
                 break
-
-    return render(request, 'manager/order.html', {'b': i, 'orders': orders, 'kitchen': kitchen, 'o': o, })
-
+    if i:
+        return render(request, 'manager/order.html', {'b': i, 'orders': orders, 'kitchen': kitchen, 'o': o, })
+    else:
+        return redirect('request')
 
 def edit_order(request):
     return redirect(request, 'manager/order.html')

@@ -92,7 +92,7 @@
         {% for product in product_list|dictsort:'title' %}
         <tr>
             <th scope="row">{{product.title}}</th>
-            <td>Умовно кілограми</td>
+            <td>{{product.unit}}</td>
             <td><input type="text" name="{{ product.title }}" class="form-control" value="0" required></td>
         </tr>
         {% endfor %}

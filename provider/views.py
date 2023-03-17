@@ -1,4 +1,3 @@
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.core.mail import send_mail, EmailMessage
 from django.http import HttpResponseServerError, HttpResponse
@@ -60,34 +59,23 @@ def activate_provider(request):
         provider.is_active = True
         provider.save()
 
-        try:
+        if provider.email and provider.email != 'Тут може бути ваша реклама!':
             email_message = EmailMessage('Дані авторизації',
                                          f'Данні для авторизації:\nLogin: {username}\nPassword: {password}',
                                          'order@kitchen-manager.com.ua',
-                                         ['fert1k@icloud.com', 'p.butovets@gmail.com'])
+                                         [provider.email])
             email_message.send()
-        except Exception as e:
-            return HttpResponseServerError(str(e))
+        else:
+            email_message = EmailMessage('Дані авторизації',
+                                         f'Данні для авторизації:\nLogin: {username}\nPassword: {password}',
+                                         'order@kitchen-manager.com.ua',
+                                         ['p.butovets@gmail.com'])
+            email_message.send()
 
-        return HttpResponse("Password generated and sent to user's email")
+
+        return HttpResponse("Дані авторизації створені та відправлені на пошту")
     else:
         return render(request, 'provider/index.html')
 
 
 # # 'p.butovets@gmail.com'
-
-# def register(request):
-#     if request.method == 'POST':
-#         form = UserRegisterForm(request.POST)
-#         if form.is_valid():
-#             user = form.save()
-#             login(request, user)
-#             messages.success(request, 'Успішна реєстрація')
-#             return redirect('kitchen')
-#         else:
-#             messages.error(request, 'Помилка реєстрації')
-#     else:
-#         form = UserRegisterForm()
-#     form = UserRegisterForm()
-#     title = 'Реєстрація'
-#     return render(request, 'users/register.html', {'title':title, 'form':form})
