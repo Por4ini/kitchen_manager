@@ -1,6 +1,8 @@
 import string
 import random
 from django.utils.crypto import get_random_string
+from django.shortcuts import redirect
+
 
 def generate():
     password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
@@ -8,5 +10,3 @@ def generate():
     return username, password
 
 
-
-print(generate())

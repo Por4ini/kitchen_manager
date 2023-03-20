@@ -20,10 +20,12 @@ def get_order(request, id):
     i = {item['kitchen__id']: item['kitchen__title'] for item in data}
     orders = Order.objects.filter(kitchen_id=id)
     kitchen = Kitchens.objects.filter(pk=id)
+    providers = PriceList.objects.all()
     if orders.exists():
-        return render(request, 'manager/order.html', {'b':i, 'orders': orders, 'kitchen': kitchen,})
+        return render(request, 'manager/order.html', {'b':i, 'orders': orders, 'o':providers, 'kitchen': kitchen,})
     else:
         return redirect('request')
+
 def edit_order(request):
     return redirect(request, 'manager/order.html')
 
@@ -50,7 +52,6 @@ def update_order(request, id, pk):
                     price_list_id=provider,
 
                 )
-
                 order.save()
             return redirect(f'/manager/order/{id}')
     return redirect(request, 'manager/order.html')
@@ -66,8 +67,6 @@ def connect(request):
     title = 'Оновлення бази'
 
     if request.method == 'POST':
-
-
         if get_kitchen(Kitchens) == True and get_provider(Provider) == True and get_price_list(Provider, PriceList, ProductList) == True:
             messages.success(request, 'База успішно оновлена!')
         else:

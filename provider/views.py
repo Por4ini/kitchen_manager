@@ -61,13 +61,13 @@ def activate_provider(request):
 
         if provider.email and provider.email != 'Тут може бути ваша реклама!':
             email_message = EmailMessage('Дані авторизації',
-                                         f'Данні для авторизації:\nLogin: {username}\nPassword: {password}',
+                                         f'Данні для авторизації:\nLogin: {username}\nPassword: {password},\nПосилання на кабінет: https://kitchen-manager.com.ua/users/login/',
                                          'order@kitchen-manager.com.ua',
                                          [provider.email])
             email_message.send()
         else:
             email_message = EmailMessage('Дані авторизації',
-                                         f'Данні для авторизації:\nLogin: {username}\nPassword: {password}',
+                                         f'Данні для авторизації:\nLogin: {username}\nPassword: {password},\nПосилання на кабінет: https://kitchen-manager.com.ua/users/login/',
                                          'order@kitchen-manager.com.ua',
                                          ['p.butovets@gmail.com'])
             email_message.send()
@@ -77,5 +77,11 @@ def activate_provider(request):
     else:
         return render(request, 'provider/index.html')
 
+def personal_office(request):
+    user = request.user
+    title = f'Кабінет {user.first_name}'
+    provider_ids = Provider.objects.filter(title__startswith=user.first_name).values_list('id', flat=True)
+    price_list_items = PriceList.objects.filter(provider_id__in=provider_ids)
+    return render(request, 'provider/office.html', {'title':title, 'price_list_items': price_list_items})
 
 # # 'p.butovets@gmail.com'

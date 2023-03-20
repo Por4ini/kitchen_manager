@@ -100,16 +100,17 @@
                 <tr>
                     <td>{{ order.title }}</td>
                     <td>
-                        <a role="button" class="btn" href="/bucket/{{order.price_list.provider.title}}/minus/{{order.id}}">-</a>
+                        <a role="button" class="btn" href="/bucket/{{order.
+                        .provider.title}}/minus/{{order.id}}">-</a>
                         {{ order.how_match }}
                         <a role="button" class="btn" href="/bucket/{{order.price_list.provider.title}}/plus/{{order.id}}">+</a>
                     </td>
 
 
                     <td>{{ order.unit }}</td>
-                    <td>{{ order.price_list.price|floatformat }}</td>
+                    <td>{{ order.price_list.price }}</td>
                     {% with answer=order.how_match %}
-                    <td>{{ answer|mul:order.price_list.price }}</td>
+                    <td>{{ answer|mul:order.price_list.price|floatformat:2 }}</td>
                     <td>
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                                 data-bs-target="#exampleModal1-{{order.id}}">
@@ -155,7 +156,7 @@
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td>{{total}}</td>
+                    <td>{{total|floatformat:2}}</td>
                     {% endif %}
                     {% endfor %}
                 </tr>
