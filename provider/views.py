@@ -79,9 +79,15 @@ def activate_provider(request):
 
 def personal_office(request):
     user = request.user
-    title = f'Кабінет {user.first_name}'
-    provider_ids = Provider.objects.filter(title__startswith=user.first_name).values_list('id', flat=True)
-    price_list_items = PriceList.objects.filter(provider_id__in=provider_ids)
-    return render(request, 'provider/office.html', {'title':title, 'price_list_items': price_list_items})
+    try:
+        if user.last_name != 'Provider':
+            redirect('login')
+        title = f'Кабінет {user.first_name}'
+        provider_ids = Provider.objects.filter(title__startswith=user.first_name).values_list('id', flat=True)
+        price_list_items = PriceList.objects.filter(provider_id__in=provider_ids)
 
+
+        return render(request, 'provider/office.html', {'title':title, 'price_list_items': price_list_items})
+    except:
+        return redirect('login')
 # # 'p.butovets@gmail.com'
