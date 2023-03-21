@@ -9,10 +9,6 @@ def get_price_list(Provider, PriceList, ProductList):
             'https://bagatolososya-chain-co.iiko.it/resto/api/auth?login=Pavel_B&pass=cd58fb308d0118ea4108da526d8f345e65590205')  # Get token for postavshil
         key = key.text.replace('"', '')
         providers = Provider.objects.all()
-        product = ProductList.objects.all()
-        product.delete()
-        price = PriceList.objects.all()
-        price.delete()
 
         for provider in providers:
             price_data = requests.get(
@@ -24,13 +20,21 @@ def get_price_list(Provider, PriceList, ProductList):
                 unit = price_item.find('name')
                 price = price_item.find('costprice')
                 try:
-                    price_list, created = PriceList.objects.get_or_create(
-                        article=article.string,
-                        item_title=item_title.string,
-                        unit=unit.string,
-                        price=price.string,
-                        provider_id=provider.pk
-                    )
+                    try:
+                        price_list = PriceList.objects.get(
+                            article=article.string,
+                            item_title=item_title.string,
+                            unit=unit.string,
+                            provider_id=provider.pk
+                        )
+                    except PriceList.DoesNotExist:
+                        price_list = PriceList.objects.create(
+                            article=article.string,
+                            item_title=item_title.string,
+                            unit=unit.string,
+                            price=price.string,
+                            provider_id=provider.pk
+                        )
 
                     provider = Provider.objects.get(id=provider.pk)
                     provider.have_price = 1
