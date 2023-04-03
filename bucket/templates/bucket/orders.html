@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load mathfilters %}
+{% block title %}{{title}}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+        {% for provider in providers %}
+    <div class="row">
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3 sidebar-sticky">
+                <ul class="nav flex-column">
+
+                    <li class="nav-item"><h5 class="text " aria-current="page">Заявки:
+                    </h5>
+                    </li>
+
+
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="{{provider}}">{{provider}}
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </nav>
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="chartjs-size-monitor">
+                <div class="chartjs-size-monitor-expand">
+                    <div class=""></div>
+                </div>
+                <div class="chartjs-size-monitor-shrink">
+                    <div class=""></div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <h3 class="pb-4 mb-4  border-bottom">
+                    Генеруємо заявку!
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#sendModal-{{forloop.counter0}}">
+                        Відправити постачальнику!
+                    </button>
+                    <h2>{{value}}</h2>
+                    <div class="modal fade" id="sendModal-{{forloop.counter0}}" tabindex="-1"
+                         aria-labelledby="exampleModalLabel"
+                         aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="sendModal">Відправити</h1>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="/bucket/to_excel/{{provider}}" method="post">
+                                        {% csrf_token %}
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                Закрити
+                                            </button>
+                                            <button type="submit" class="btn btn-primary" value="Update">Надіслати
+                                                заявку
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            {% endfor %}
+
+            </h3>
+            <h2>Загальна сума заявок: {{ total_sum }} грн.</h2>
+
+
+            {% for kitchen in kitchens %}
+
+            <p>Дата заявки: {{ my_date }}</p>
+            <p>Дата доставки: {{ delivery_date }} </p>
+            <p>Підприємство: {{ kitchen.title }}</p>
+            <p>ФОП: {{ kitchen.technical_information }}</p>
+            <p>Адреса доставки: {{ kitchen.address }}</p>
+
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Найменування</th>
+                    <th>Кількість</th>
+                    <th>Одиниця виміру</th>
+                    <th>Ціна, грн</th>
+                    <th>Сума, грн</th>
+                    <th></th>
+                </tr>
+
+                </thead>
+                {% for order in orders %}
+                {% if order.kitchen_id == kitchen.id %}
+                <tbody>
+                <tr>
+                    <td>{{ order.title }}</td>
+                    <td>
+                        <a role="button" class="btn" href="/bucket/{{order.
+                        .provider.title}}/minus/{{order.id}}">-</a>
+                        {{ order.how_match }}
+                        <a role="button" class="btn" href="/bucket/{{order.price_list.provider.title}}/plus/{{order.id}}">+</a>
+                    </td>
+
+
+                    <td>{{ order.unit }}</td>
+                    <td>{{ order.price_list.price }}</td>
+                    {% with answer=order.how_match %}
+                    <td>{{ answer|mul:order.price_list.price|floatformat:2 }}</td>
+                    <td>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#exampleModal1-{{order.id}}">
+                            Видалити
+                        </button>
+
+                        <!-- Modal to Delete-->
+                        <div class="modal fade" id="exampleModal1-{{order.id}}" tabindex="-1"
+                             aria-labelledby="exampleModalLabel"
+                             aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel1">Видалити</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        Ви точно бажаєте видалити {{ order.title }}
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрити
+                                        </button>
+                                        <a role="button"
+                                           href="/bucket/{{order.price_list.provider.title}}/delete/{{order.pk}}"
+                                           class="btn btn-danger">Видалити </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    {% endwith %}
+                </tr>
+                </tbody>
+                {% endif %}
+                {% endfor %}
+
+                <tfoot>
+                <tr>
+                    {% for kitchen_id, total in kitchen_total.items %}
+                    {% if kitchen_id == kitchen.id %}
+                    <td>Сума:</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>{{total|floatformat:2}}</td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                </tfoot>
+            </table>
+            <p>
+                ******************************************************************************************************************************************************************</p>
+            {% endfor %}
+        </main>
+    </div>
+
+</div>
+
+
+{% endblock %}

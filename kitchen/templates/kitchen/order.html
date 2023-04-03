@@ -2,7 +2,7 @@
 {% block title %}{{title}}{% endblock %}
 {% block content %}
 
-
+<h1 class="text text-center">{{ title_kitchen }}</h1>
 <table class="table">
     <thead>
     <tr>
@@ -16,7 +16,8 @@
     <tbody>
 
     {% for order in orders %}
-    {% if order.send == False %}
+    {% if order.date|date:"Y-m-d" == filter_date|date:"Y-m-d" %}
+
     <tr>
         <td>{{ order.how_match }}</td>
         <td>{{ order.unit }}</td>

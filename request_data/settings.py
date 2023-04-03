@@ -46,8 +46,10 @@ INSTALLED_APPS = [
     'manager',
     'bucket',
     'mathfilters',
+    'provider',
 
 ]
+
 
 MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -58,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'request_data.RestrictPageMiddleware.RestrictPageMiddleware',
 ]
 
 ROOT_URLCONF = 'request_data.urls'
@@ -124,7 +127,7 @@ TIME_ZONE = 'Europe/Kiev'
 
 USE_I18N = True
 
-USE_TZ = True
+# USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)

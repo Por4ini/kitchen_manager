@@ -82,6 +82,7 @@
             {% for item in kitchens %}
             {% if item.id == k_id %}
             <p>Дата заявки: {{my_date|date:"d.m.Y"}}</p>
+            <p>Дата доставки: {{delivery_date|date:"d.m.Y"}}</p>
             <p>Підприємство: {{item.title}} </p>
             <p>ФОП: {{item.technical_information}}</p>
             <p>Адреса доставки: {{item.address}} </p>

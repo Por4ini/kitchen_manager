@@ -6,24 +6,27 @@
                 aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+        {% if user.last_name != 'Provider' %}
         <div class="collapse navbar-collapse" id="navbarNav">
             <div class="navbar-nav">
                 <a class="nav-link px-2" aria-current="page" href="{% url 'home'%}">Головна</a>
 
-            {% if request.user.is_authenticated %}
+                {% if request.user.is_authenticated %}
                 <a class="nav-link px-2" aria-current="page" href="{% url 'kitchen'%}">Підприємства</a>
-            {% endif %}
+                {% endif %}
 
-            {% if user.is_superuser == 1 %}
+                {% if user.is_superuser == 1 %}
                 <a class="nav-link px-2" aria-current="page" href="{% url 'request'%}">Заявки</a>
                 <a class="nav-link px-2" aria-current="page" href="{% url 'bucket'%}">Кошик</a>
                 <a class="nav-link px-2" aria-current="page" href="{% url 'connect'%}">Підключення</a>
-            {% endif %}
+                <a class="nav-link px-2" aria-current="page" href="{% url 'provider'%}">Постачальники</a>
+                {% endif %}
             </div>
+            {% endif %}
             <div class="d-flex flex-row-reverse" style="width: 100%">
 
-            {% if request.user.is_authenticated %}
-                {{user.first_name}}  {{user.last_name}} |
+                {% if request.user.is_authenticated %}
+
                 <a style="margin-left: 0.5rem!important;" href="{% url 'logout'%}">
                     <button class="btn btn-outline-light me-2">
                         Вийти
@@ -31,14 +34,17 @@
                 </a>
                 <p class="text-white m-0" style="padding-top: 7px">
                     <i class="bi bi-person-square"></i>
-                    {{user}}</p>
-            {% else %}
+                    {{user.first_name}}
+                    {% if user.last_name != 'Provider'%}
+                    {{user.last_name}}
+                    {%endif%}</p>
+                {% else %}
                 <a style="margin-left: 0.5rem!important;" href="{% url 'login' %}">
                     <button class="btn btn-outline-light me-2">
                         Login
                     </button>
                 </a>
-            {% endif%}
+                {% endif%}
 
             </div>
         </div>

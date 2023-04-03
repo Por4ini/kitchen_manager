@@ -1,238 +1,140 @@
+from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from kitchen.models import *
-from datetime import datetime
-import json
-import pandas as pd
-import openpyxl
-from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
-from openpyxl.utils import get_column_letter
-
-import imp
+from openpyxl import Workbook
 from django.core.mail import send_mail, EmailMessage
 
 
-# Create your views here.
+
 def bucket(request):
     title = 'Кошик'
-    data = Order.objects.filter(bucket=True)
-    i = []
-    prov = {}
+    data = Order.objects.filter(bucket=True, to_prov=False)
+    providers = []
+    # Пройтися по кожному об'єкту Order і отримати провайдера за допомогою зовнішнього ключа price_list
     for item in data:
-        i.append(item.price_list.provider.id)
-    for num in set(i):
-        for item in data:
-            if num == item.price_list.provider.id:
-                prov.update(({num: item.price_list.provider.title}))
-                break
-    return render(request, 'bucket/index.html', {'title': title, 'prov': prov, 'data': data, 'my_date': datetime.now()})
+        provider = item.price_list.provider.title.split('@')[0]
+        providers.append(provider)
+    return render(request, 'bucket/home.html', {'title': title, 'providers': set(providers)})
 
 
-def create_order(request, id):
-    title = 'Кошик'
-    data = Order.objects.filter(bucket=True)
-    i = []
-    prov = {}
+def create_order(request, provider):
+    title = f'Замовлення від постачальника {provider}'
+    data = Order.objects.filter(bucket=True, to_prov=False)
+    providers = []
+    order_ = Order.objects.filter(bucket=True, to_prov=False, send=True, price_list__provider__title__contains=provider).order_by(
+        'date',
+        'delivery_date').last()
+    my_date = order_.date if order_ else None
+    delivery_date = order_.delivery_date if order_ else None
     for item in data:
-        i.append(item.price_list.provider.id)
-    for num in set(i):
-        for item in data:
-            if num == item.price_list.provider.id:
-                prov.update(({num: item.price_list.provider.title}))
-                break
-    kitchens = Kitchens.objects.all()
-    k = []
-    for item in data:
-        for kitchen in kitchens:
-            if item.kitchen_id == kitchen.id:
-                k.append(kitchen.id)
-    values = {}
+        provider_ = item.price_list.provider.title.split('@')[0]
+        providers.append(provider_)
 
-    for item in set(i):
-        if str(item) == str(id):
+    orders = Order.objects.filter(bucket=True, to_prov=False,  price_list__provider__title__contains=provider)
+    kitchens = Kitchens.objects.filter(order__bucket=True, order__to_prov=False,
+                                       order__price_list__provider__title__contains=provider).distinct()
+    kitchen_total = {}
+    for kitchen in kitchens:
+        kitchen_total[kitchen.id] = 0
+        for order in orders:
+            if order.kitchen.id == kitchen.id:
+                kitchen_total[kitchen.id] += float(order.how_match) * float(order.price_list.price)
 
-            total_sum = 0
-            values[item] = []
-            for kit in kitchens:
-                sum = 0
-                for order in data:
-
-                    if order.price_list.provider_id == item and order.kitchen_id == kit.id:
-                        a = float(order.price_list.price) * float(order.how_match)
-                        sum += a
-                    else:
-                        continue
-                total_sum += sum
-
-                if sum != 0:
-                    values[item].append({
-                        kit.id: sum
-                    })
-            total_sum1 = total_sum
-
-    return render(request, 'bucket/index.html',
-                  {'kitchens': kitchens, 'kitchens_id': set(k), 'title': title, 'prov': prov, 'data': data,
-                   'my_date': datetime.now(), 'id': int(id), 'values': values, 'total': total_sum1})
+    # отримуємо список значень зі словника
+    total_sum = sum(kitchen_total.values())
+    if total_sum == 0:
+        return redirect('bucket')
+    return render(request, 'bucket/orders.html', {'title': title, 'providers': set(providers), 'orders': orders,
+                                                  'my_date': my_date, 'delivery_date': delivery_date,
+                                                  'kitchens': kitchens, 'kitchen_total': kitchen_total,
+                                                  'total_sum': total_sum})
 
 
-def to_excel(request, id):
-    today = datetime.now()
-    d1 = today.strftime("%d-%m-%Y")
+#
+def to_excel(request, provider):
+    order_date = Order.objects.filter(bucket=True, send=True, to_prov=False, price_list__provider__title__contains=provider).order_by(
+        'date',
+        'delivery_date').last()
+    my_date = order_date.date if order_date else None
+    delivery_date = order_date.delivery_date if order_date else None
     if request.method == "POST":
-
-        data = Order.objects.filter(bucket=True)
-        i = []
-
-        prov = {}
+        # data = Order.objects.filter(bucket=True)
+        data = Order.objects.filter(bucket=True, to_prov=False, send=True, price_list__provider__title__contains=provider)
+        providers = []
         for item in data:
-            i.append(item.price_list.provider.id)
-        for num in set(i):
-            for item in data:
-                if num == item.price_list.provider.id:
-                    prov.update(({num: item.price_list.provider.title}))
-                    break
-        kitchens = Kitchens.objects.all()
-        k = []
-        for item in data:
-            if str(item.price_list.provider.id) == str(id):
-                for kitchen in kitchens:
-                    if item.kitchen_id == kitchen.id:
-                        k.append(kitchen.id)
+            provider = item.price_list.provider.title.split('@')[0]
+            providers.append(provider)
+        kitchens = Kitchens.objects.filter(order__bucket=True, order__to_prov=False,
+                                           order__price_list__provider__title__contains=provider)
 
-        with open('new_file.json') as json_file:
-            json_data = json.load(json_file)
-            json_data['id'].clear()
-        json_data["id"].append({"Дата": d1})
+        wb = Workbook()
+        ws = wb.active
 
-        for item in set(k):
-            for kit in kitchens:
-                if str(item) == str(kit.id):
-                    sum = 0
-                    json_data["id"].append({" ":
-                        {
-                            "Назва": kit.title,
-                            "ФОП": kit.technical_information,
-                            "Адреса": kit.address,
-                        }})
+        # додаємо заголовки для колонок дат
+        ws.append(["Дата замовлення", "Дата доставки"])
+        # додаємо значення дат
+        ws.append([my_date, delivery_date])
 
-                    for order in data:
-                        if int(order.price_list.provider_id) == int(id) and order.kitchen_id == kit.id:
-                            a = float(order.price_list.price) * float(order.how_match)
-                            sum += a
-                            json_data["id"].append({"-"
-                                                    "git ":
-                                {
-                                    "Продукт": order.price_list.item_title,
-                                    "Кількість": order.how_match,
-                                    "Од. виміру": order.unit.title,
-                                    "Ціна, грн": float(order.price_list.price),
-                                    "Сума, грн": a,
-                                }})
-                    if sum != 0:
-                        json_data["id"].append({"Загальна ":
-                            {
-                                'Сумма': sum
-                            }})
-                        break
+        for kitchen in kitchens.distinct():
+            print(kitchen)
+            sum = 0
+            # додаємо заголовки для колонок підприємства
+            ws.append(["Назва", "ФОП", "Адреса"])
 
-            with open('new_file.json', 'w', encoding='utf-8') as outfile:
-                json.dump(json_data, outfile, indent=4, ensure_ascii=False)
-                outfile.close()
-        print('use_send')
-        with open('new_file.json', encoding='utf8') as file:
-            data = json.load(file)
+            # додаємо значення підприємства
+            ws.append([kitchen.title, kitchen.technical_information, kitchen.address])
+            # додаємо заголовки для колонок замовлення
+            ws.append(["Продукт", "Кількість", "Одиниця виміру", "Ціна", "Сума"])
+            # додаємо рядки замовлення
+            for order in data:
+                if order.kitchen.title == kitchen.title:
+                    a = float(order.price_list.price) * float(order.how_match)
+                    sum += a
+                    ws.append([order.price_list.item_title, order.how_match, order.unit, order.price_list.price, a])
+                    order.to_prov = 1
+                    order.save()
+                # додаємо загальну суму
+            ws.append(["Загальна сума", sum])
+            for column_cells in ws.columns:
+                length = max(len(str(cell.value)) for cell in column_cells)
+                ws.column_dimensions[column_cells[0].column_letter].width = length + 2
 
-        data_list = data['id']
+            wb.save("my_orders.xlsx")
+            print('Відправляю')
+            user = User.objects.get(first_name=provider)
 
-        df_m1 = pd.json_normalize(data_list, max_level=2)
-        df_m1.to_excel('Заявка.xlsx')
-        wb = openpyxl.load_workbook('Заявка.xlsx')
-        sheet = wb.active
-        sheet.column_dimensions['A'].width = 2
-        sheet.column_dimensions['B'].width = 9
-        sheet.column_dimensions['C'].width = 12
-        sheet.column_dimensions['D'].width = 12
-        sheet.column_dimensions['E'].width = 12
-        sheet.column_dimensions['F'].width = 12
-        sheet.column_dimensions['G'].width = 10
-        sheet.column_dimensions['H'].width = 12
-        sheet.column_dimensions['I'].width = 9
-        sheet.column_dimensions['J'].width = 12
-        sheet.column_dimensions['K'].width = 14
-        row_count = sheet.max_row
-        for i in range(1, row_count + 1):
-            sheet.row_dimensions[i].height = 25
+            if user.email and user.email != 'Тут може бути ваша реклама!':
+                email = user.email
+                email_message = EmailMessage(f'Заявка {my_date}', 'Заявка в цьому файлі\n', 'order@kitchen-manager.com.ua',
+                                                     [email])
+            else:
+                email_message = EmailMessage(f'Заявка {my_date}', 'Заявка в цьому файлі\n',
+                                             'order@kitchen-manager.com.ua',
+                                             ['p.butovets@gmail.com'])
+            email_message.attach_file('my_orders.xlsx')
+            email_message.send()
+            print('excel відправлений')
 
 
 
-        wb.save("Заявка.xlsx")
-        print('0')
-        data_delete = Order.objects.filter(bucket=True)
-        print('Отправляю')
-        for item in data_delete:
-            if str(item.price_list.provider.id) == str(id):
-                email_message = EmailMessage(f'Заявка. {d1}', 'Заявка в цьому файлі\n', 'order@kitchen-manager.com.ua',
-                                             ['kitchen_order@ukr.net', item.price_list.provider.email])
-                email_message.attach_file('Заявка.xlsx')
-                email_message.send()
-                print('excel відправлений')
-                break
-        for item in data_delete:
-            if str(item.price_list.provider_id) == str(id):
-                print('1')
-                item.delete()
-
-        return redirect(f'/bucket')
-
-    return redirect(request, f'/bucket/{id}', {'my_date': datetime.now()})
+    return redirect(f'/bucket/{provider}')
 
 
-def delete_order(request, id, pk):
+def delete_order(request, provider, pk):
     this_order = Order.objects.filter(id=pk)
     this_order.delete()
-    return redirect(f'/bucket/{id}')
+    return redirect(f'/bucket/{provider}')
 
 
-def plus(request, id, pk):
-    this_order = Order.objects.filter(id=pk)
-    print(id)
-    print(pk)
-    for item in this_order:
-        order = Order(
-            id=item.id,
-            how_match=float(item.how_match) + 1,
-            chef=item.chef,
-            kitchen_id=item.kitchen.id,
-            unit=item.unit,
-            title=item.title,
-            price_list_id=item.price_list.id,
-            send=item.send,
-            bucket=item.bucket,
-            to_prov=item.to_prov,
-        )
-
-        order.save()
-        return redirect(f'/bucket/{id}')
-    return redirect(f'/bucket/{id}')
+def plus(request, provider, pk):
+    order = Order.objects.get(id=pk)
+    order.how_match = float(order.how_match) + 1
+    order.save()
+    return redirect(f'/bucket/{provider}')
 
 
-def minus(request, id, pk):
-    this_order = Order.objects.filter(id=pk)
-    print(id)
-    print(pk)
-    for item in this_order:
-        order = Order(
-            id=item.id,
-            how_match=float(item.how_match) - 1,
-            chef=item.chef,
-            kitchen_id=item.kitchen.id,
-            unit=item.unit,
-            title=item.title,
-            price_list_id=item.price_list.id,
-            send=item.send,
-            bucket=item.bucket,
-            to_prov=item.to_prov,
-        )
-
-        order.save()
-        return redirect(f'/bucket/{id}')
-    return redirect(f'/bucket/{id}')
+def minus(request, provider, pk):
+    order = Order.objects.get(id=pk)
+    order.how_match = float(order.how_match) - 1
+    order.save()
+    return redirect(f'/bucket/{provider}')

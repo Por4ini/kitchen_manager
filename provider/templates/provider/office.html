@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}{{title}}{% endblock %}
+
+{% block content %}
+
+<form action="" , method="post">
+    {% csrf_token %}
+
+    <table class="table">
+
+        <thead>
+        <tr>
+            <th scope="col">Продукт</th>
+            <th scope="col">Кількість</th>
+            <th scope="col">#</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        {% for item in price_list_items|dictsort:'item_title' %}
+        <tr>
+            <th scope="row">{{item.item_title}}</th>
+            <td><input type="text" name="price_data" class="form-control" value="{{item.price}}" required></td>
+<!--            <td>-->
+<!--                <button type="submit" class="btn btn-primary">Змінити</button>-->
+<!--            </td>-->
+        </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+</form>
+
+{% endblock%}

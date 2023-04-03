@@ -23,6 +23,7 @@ urlpatterns = [
     path('bucket/', include('bucket.urls')),
     path('kitchen/', include('kitchen.urls')),
     path('users/', include('users.urls')),
+    path('provider/', include('provider.urls')),
     path('', index, name='home')
 ]
 

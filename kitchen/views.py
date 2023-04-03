@@ -4,7 +4,7 @@ from .forms import *
 from datetime import datetime, time
 import pytz
 
-# Create your views here.
+
 
 def index(request):
     title = 'Головна сторінка'
@@ -18,11 +18,12 @@ def kitchen(request):
 
 def create_request(request, kitchens_id):
     title = 'Створити заявку'
+    kitchen = Kitchens.objects.get(pk=kitchens_id)
+    title_kitchen = kitchen.title
     orders = Order.objects.filter(kitchen_id=kitchens_id)
     dates = Order.objects.filter(kitchen_id=kitchens_id).values_list('date', flat=True).distinct().order_by('date')
     unique_dates = list(set([datetime.strftime(date, '%Y-%m-%d') for date in dates]))
     unique_dates.sort()
-
     product_list = ProductList.objects.all()
     my_date = datetime.now(tz=pytz.timezone('Europe/Kiev'))
     if request.method == 'POST':
@@ -31,11 +32,9 @@ def create_request(request, kitchens_id):
             if how_match != '0':
                 how_match = how_match
                 product = ProductList.objects.get(title=product.title)
-                print(how_match)
-                print(product.id)
                 Order.objects.create(
                     how_match=how_match,
-                    unit_id=59,
+                    unit=product.unit,
                     title_id=product.id,
                     chef= request.user.first_name + " " + request.user.last_name,
                     kitchen_id=kitchens_id
@@ -44,76 +43,17 @@ def create_request(request, kitchens_id):
         return redirect(f'/kitchen/create_request/{kitchens_id}')
 
     return render(request, 'kitchen/create_request.html',
-                      {'unique_dates': unique_dates, 'my_date':my_date, 'title': title, 'kitchens_id': kitchens_id, 'orders': orders,'product_list':product_list})
+                      {'unique_dates': unique_dates, 'my_date':my_date, 'title': title, 'kitchens_id': kitchens_id, 'orders': orders,'product_list':product_list, 'title_kitchen':title_kitchen})
 
 def order_archive(request, kitchens_id, date):
     orders = Order.objects.filter(kitchen_id=kitchens_id)
     title = 'Архів замовлень'
+    kitchen = Kitchens.objects.get(pk=kitchens_id)
+    title_kitchen = kitchen.title
+    filter_date = datetime.strptime(date, '%Y-%m-%d')
     return render(request, 'kitchen/order.html',
                   {'title': title, 'kitchens_id': kitchens_id,
-                   'orders': orders, 'filter_date':date})
-
-    # def create_request(request, kitchens_id):
-#     title = 'Створити заявку'
-#     time_start = time(00)
-#     time_end = time(23,59)
-#     time_end_edit = time(23,59)
-#     timer = {
-#         'start':time_start,
-#         'end':time_end,
-#         'end_edit':time_end_edit,
-#     }
-#     kitchen = Kitchens.objects.filter(id=kitchens_id)
-#     data = Order.objects.filter(kitchen_id=kitchens_id)
-#     for item in kitchen:
-#
-#         if request.method == 'POST':
-#             form = OrderForm(request.POST)
-#             if form.is_valid():
-#                 instance = form.save(commit=False)
-#                 instance.chef = request.user.first_name + " " + request.user.last_name
-#                 instance.kitchen_id = item.id
-#                 instance.save()
-#         else:
-#             form = OrderForm()
-#     return render(request, 'kitchen/create_request.html',
-#                   {'time':timer, 'title': title, 'form': form, 'kitchen': kitchen,'kitchens_id':kitchens_id, 'data': data, 'my_date': datetime.now()})
-
-#
-# def edit(request, kitchens_id):
-#     data = Order.objects.filter(kitchen_id=kitchens_id)
-#
-#     return redirect(request, 'kitchen/create_request.html', {'data': data})
-#
-#
-# def update(request, kitchens_id, id):
-#     if request.method == 'POST':
-#         how_match = request.POST.get('how_match')
-#         kitchens = Kitchens.objects.filter(id=kitchens_id)
-#         this_order = Order.objects.filter(pk=id)
-#         for title in this_order:
-#             order = Order(
-#                 id=id,
-#                 how_match=how_match,
-#                 chef=request.user.first_name + " " +  request.user.last_name,
-#                 kitchen_id=title.kitchen.id,
-#                 unit=title.unit,
-#                 title=title.title
-#             )
-#
-#             order.save()
-#         return redirect(f'/kitchen/create_request/{kitchens_id}')
-#     return redirect(request, f'/kitchen/create_request/{kitchens_id}')
-#
-#
-# def delete(request, id, kitchens_id):
-#     kitchens = Kitchens.objects.filter(id=kitchens_id)
-#     for item in kitchens:
-#         kitchens_id = item.id
-#         data = Order.objects.filter(id=id)
-#         data.delete()
-#         return redirect(f'/kitchen/create_request/{kitchens_id}')
-#     return redirect(request, f'/kitchen/create_request/{kitchens_id}')
+                   'orders': orders, 'filter_date': filter_date, 'title_kitchen':title_kitchen})
 
 
 def send_order(request, kitchens_id):
@@ -123,28 +63,20 @@ def send_order(request, kitchens_id):
     if request.method == 'POST':
 
         for item in data:
-            price = PriceList.objects.filter(item_title=item.title.title)
-            a = []
-            price_id = []
-            for ti in price:
-                if float(ti.price) == 0.0:
-                    print('Нахуй')
-                else:
-                    a.append(float(ti.price))
-            a = min(a)
-            for i in price:
-                if str(a) in str(i.price):
-                    price_id.append(i.id)
+            price = PriceList.objects.filter(item_title=item.title.title).exclude(price=0)
+            sorted_bananas = price.order_by('price')
+            cheapest_banana = sorted_bananas.first()
+            price_id = cheapest_banana.id
 
             order = Order(
                 id=item.id,
                 how_match=item.how_match,
                 chef=item.chef,
                 kitchen_id=item.kitchen.id,
-                unit_id=item.unit.id,
+                unit=item.unit,
                 title_id=item.title.id,
                 send=True,
-                price_list_id=price_id[0],
+                price_list_id=price_id,
                 bucket=item.bucket,
             )
             order.save()

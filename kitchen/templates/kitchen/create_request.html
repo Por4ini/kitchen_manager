@@ -24,7 +24,7 @@
 </div>
 
 <div>
-    <h1 class="text-center">{{title}}</h1>
+    <h1 class="text-center">{{title}} на {{title_kitchen}}</h1>
     <div class="modal fade" id="sendModal-{{forloop.counter0}}" tabindex="-1"
          aria-labelledby="exampleModalLabel"
          aria-hidden="true">
@@ -92,7 +92,7 @@
         {% for product in product_list|dictsort:'title' %}
         <tr>
             <th scope="row">{{product.title}}</th>
-            <td>Умовно кілограми</td>
+            <td>{{product.unit}}</td>
             <td><input type="text" name="{{ product.title }}" class="form-control" value="0" required></td>
         </tr>
         {% endfor %}
