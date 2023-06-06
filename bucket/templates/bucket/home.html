@@ -17,7 +17,11 @@
                     {% for provider in providers %}
 
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page"  href="{{provider}}">{{provider}}
+             <a class="nav-link active" aria-current="page" href="{% url 'create_order' provider %}">
+  {{ provider }}
+</a>
+
+
                         </a>
                     </li>
                     {% endfor %}

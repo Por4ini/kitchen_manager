@@ -42,7 +42,7 @@ def update_order(request, id, pk):
             for title in this_order:
                 order = Order(
                     id=title.id,
-                    how_match=how_match,
+                    how_match=how_match.replace(',', '.'),
                     chef=request.user.username,
                     kitchen_id=id,
                     unit=title.unit,
@@ -67,11 +67,21 @@ def connect(request):
     title = 'Оновлення бази'
 
     if request.method == 'POST':
-        # if get_kitchen(Kitchens) == True and get_provider(Provider) == True and get_price_list(Provider, PriceList, ProductList) == True:
-        if get_price_list(Provider, PriceList, ProductList) == True:
-            messages.success(request, 'База успішно оновлена!')
+        if get_kitchen(Kitchens) == True :
+            messages.success(request, 'База підприємств оновлена!')
         else:
-            messages.error(request, 'Помилка оновлення бази, зверніться до розробника.')
+            messages.error(request, 'Помилка оновлення бази підприємств, зверніться до розробника.')
+
+        if get_provider(Provider) == True:
+            messages.success(request, 'База постачальників оновлена!')
+        else:
+            messages.error(request, 'Помилка оновлення бази постачальників, зверніться до розробника.')
+
+        if get_price_list(Provider, PriceList, ProductList) == True:
+            messages.success(request, 'База прайсів оновлена!')
+        else:
+            messages.error(request, 'Помилка оновлення бази прайсів, зверніться до розробника.')
+
 
     return render(request, 'manager/connect.html', {'title': title})
 

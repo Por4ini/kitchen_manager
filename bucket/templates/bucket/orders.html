@@ -3,7 +3,6 @@
 {% block title %}{{title}}{% endblock %}
 {% block content %}
 <div class="container-fluid">
-        {% for provider in providers %}
     <div class="row">
         <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
             <div class="position-sticky pt-3 sidebar-sticky">
@@ -13,10 +12,13 @@
                     </h5>
                     </li>
 
-
+                            {% for provider in providers %}
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{{provider}}">{{provider}}
-                        </a>
+                        <a class="nav-link active" aria-current="page" href="{% url 'create_order' provider %}">
+  {{ provider }}
+</a>
+                                  {% endfor %}
+
                     </li>
 
                 </ul>
@@ -51,7 +53,7 @@
                                             aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <form action="/bucket/to_excel/{{provider}}" method="post">
+                                    <form action="" method="post">
                                         {% csrf_token %}
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -68,8 +70,7 @@
                         </div>
                     </div>
             </div>
-            {% endfor %}
-
+  
             </h3>
             <h2>Загальна сума заявок: {{ total_sum }} грн.</h2>
 
@@ -100,8 +101,7 @@
                 <tr>
                     <td>{{ order.title }}</td>
                     <td>
-                        <a role="button" class="btn" href="/bucket/{{order.
-                        .provider.title}}/minus/{{order.id}}">-</a>
+                        <a role="button" class="btn" href="/bucket/{{order.price_list.provider.title}}/minus/{{order.id}}">-</a>
                         {{ order.how_match }}
                         <a role="button" class="btn" href="/bucket/{{order.price_list.provider.title}}/plus/{{order.id}}">+</a>
                     </td>

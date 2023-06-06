@@ -6,11 +6,13 @@ import requests
 def get_kitchen(Kitchens):
     try:
         response = requests.get(
-            'https://card.iiko.co.uk/api/0/auth/access_token?user_id=bagatolososia&user_secret=ewn934wffwhyA').text
+    'https://loyalty.syrve.live:443/api/0/auth/access_token?user_id=bagatolososia&user_secret=ewn934wffwhyA').text
+
         token = response.replace('"', '')  # iko_biz api
-        res = requests.get("https://card.iiko.co.uk/api/0/deliverySettings/getDeliveryTerminals",
-                           params={"access_token": token,
-                                   'organization': 'b2320000-3838-06a2-edca-08d919d0bc83'}).json()
+        res = requests.get("https://loyalty.syrve.live:443/api/0/deliverySettings/getDeliveryTerminals",
+                   params={"access_token": token,
+                           'organization': 'b2320000-3838-06a2-edca-08d919d0bc83'}).json()
+
 
         for item in res['deliveryTerminals']:
             organizationId = item['organizationId']

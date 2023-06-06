@@ -5,15 +5,15 @@ from django.shortcuts import render, redirect
 from kitchen.models import *
 from data.utils import generate
 from django.contrib.auth.hashers import make_password
-
+from data.provider_update import get_provider
 
 
 def prov_list(request):
     title = "Список постачальників"
+    providers = Provider.objects.all()
     p_user = User.objects.all()
     if request.method == 'POST':
         unique_values = set()
-        providers = Provider.objects.all()
         for provider in providers:
             title = provider.title
             if '@' in title:

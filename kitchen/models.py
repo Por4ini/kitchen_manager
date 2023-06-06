@@ -76,7 +76,7 @@ class Unit(models.Model):
 
 class Order(models.Model):
     id = models.AutoField(primary_key=True, auto_created=True)
-    how_match = models.CharField(max_length=60, verbose_name='Кількість')
+    how_match = models.FloatField(verbose_name='Кількість')
     unit = models.CharField(max_length=60, verbose_name='Одиниця виміру')
     title = models.ForeignKey('ProductList', on_delete=models.CASCADE, null=True, verbose_name='Продукт')
     chef = models.CharField(max_length=100)
@@ -91,7 +91,15 @@ class Order(models.Model):
 
     def __str__(self):
         return self.title
-
+        
+        
+    def clean(self):
+        # Замінюємо кому на крапку у значенні поля
+        if self.how_match is not None and isinstance(self.how_match, str):
+            self.how_match = self.how_match.replace(',', '.')
+        super().clean()
+        
+        
     class Meta:
         managed = True
         db_table = 'neworder'

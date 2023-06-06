@@ -23,13 +23,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-n_p!6wu@df_j)b2^deo8*nfr77u^!rk#+r=nq9ne14css69sa*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'static'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-
 
 
 # Application definition
@@ -91,7 +90,7 @@ WSGI_APPLICATION = 'request_data.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '195.54.163.133',
+        'HOST': 'localhost',
         'NAME': 'h54453c_MyData',
         'USER': 'h54453c_por4ini',
         'PASSWORD': 'Itred19841',

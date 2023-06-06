@@ -33,7 +33,7 @@ def create_request(request, kitchens_id):
                 how_match = how_match
                 product = ProductList.objects.get(title=product.title)
                 Order.objects.create(
-                    how_match=how_match,
+                    how_match=how_match.replace(',', '.'),
                     unit=product.unit,
                     title_id=product.id,
                     chef= request.user.first_name + " " + request.user.last_name,
